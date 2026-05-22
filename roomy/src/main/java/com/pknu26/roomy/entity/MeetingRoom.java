@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "meeting_room")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 public class MeetingRoom {
 
     @Id
