@@ -1,123 +1,158 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import DatePicker from "../components/reservation/DatePicker";
-import TimeTimeline from "../components/reservation/TimeTimeline";
-import axios from "../api/axiosInstance";
-import { ReservationStatus } from "roomy";
+import api from "../api/axiosInstance";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [error, setError] = useState("");
+
+  const [rooms, setRooms] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [roomTimeSlots, setRoomTimeSlots] = useState({});
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    setRoomTimeSlots({});
+    setError(null);
+    // 사용자가 필요한 회의실만 수동으로 조회
+  }, [selectedDate]);
 
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+  // 세션 인증 로직
+  useEffect(() => {
+    const checkSession = () => {
+      const username = sessionStorage.getItem("username");
+      const password = sessionStorage.getItem("password");
 
-    fetchReservations();
-  }, [date, navigate]);
-
-  const fetchReservations = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-
-      const response = await axios.get("/api/reservations/my-reservations", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const reservations = response.data;
-
-      const usedSlots = new Set();
-      reservations.forEach((reservation) => {
-        if (reservation.status === ReservationStatus.RESERVED) {
-          usedSlots.add(`${reservation.start_time}`);
-        }
-      });
-
-      const endHour = 18;
-      const timeline = [];
-
-      for (let hour = 9; hour < endHour; hour++) {
-        const hourStr = `${String(hour).padStart(2, "0")}:00`;
-        if (!usedSlots.has(hourStr)) {
-          timeline.push(hourStr);
-        }
+      if (!username || !password) {
+        navigate("/login");
+        return;
       }
+    };
+    checkSession();
+  }, [navigate]);
 
-      setAvailableSlots(timeline);
-    } catch (err) {
-      setError("예약 현황 조회 실패");
-      console.error(err);
-    }
-  };
-
-  const handleBookSlot = async (slot, startTime, endTime) => {
-    const token = localStorage.getItem("authToken");
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-
-    if (!userInfo) {
-      navigate("/login");
-      return;
-    }
-
-    setError("");
-
-    setLoading(true);
-
+  const fetchAvailableTimeSlots = async (roomId) => {
     try {
-      const response = await axios.post(
-        "/api/reservations",
-        {
-          roomNo: slot,
-          start_time: startTime,
-          end_time: endTime,
-          userId: userInfo.username,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+      const response = await api.get(
+        `/api/rooms/timeslots?room-id=${roomId}&date=${selectedDate}`,
       );
-
-      alert("예약 완료!");
+      setRoomTimeSlots((prev) => ({ ...prev, [roomId]: response.data }));
     } catch (err) {
-      const message = err.response?.data?.message || err.message || "예약 실패";
-      setError(message);
-      console.error(err);
-    } finally {
-      setLoading(false);
+      setError("회의실 타임 슬롯 조회에 실패했습니다.");
     }
   };
+
+  const handleReservation = async (roomId, startTime, roomCapacity) => {
+    try {
+      const response = await api.post(`/api/reservations`, {
+        roomId,
+        startTime,
+        endTime: startTime,
+        reservationDate: selectedDate,
+      });
+
+      // 예약 완료 후 타임 슬롯 재조회
+      await fetchAvailableTimeSlots(roomId);
+
+      setError(null);
+      alert(
+        `회의실 ${response.data.name} 의 ${startTime}에 예약이 완료되었습니다.`,
+      );
+    } catch (err) {
+      const message = err.response?.data?.message || "예약에 실패했습니다.";
+      setError(message);
+      if (message.includes("동시 예약")) {
+        alert("동시에 예약할 수 없는 시간입니다.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/api/rooms");
+        setRooms(response.data);
+      } catch (err) {
+        setError("회의실 정보를 불러오기에 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRooms();
+  }, []);
 
   return (
-    <div className="page-container">
-      <h2>예약 대시보드</h2>
+    <div className="dashboard-container">
+      <h2>회의실 예약 대시보드</h2>
 
-      {error && <div className="error-message">{error}</div>}
+      <div className="date-picker-section">
+        <label htmlFor="reservation-date">예약 날짜 선택:</label>
+        <input
+          type="date"
+          id="reservation-date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+        />
+      </div>
 
-      <div className="dashboard-wrapper">
-        <DatePicker selectedDate={date} onChangeDate={setDate} />
+      {error && <p className="error-message">{error}</p>}
+      {loading && <p>회의실 정보를 불러오는 중입니다...</p>}
 
-        <div className="room-list">
-          {availableSlots.map((slot, index) => (
-            <div key={index} className="room-card">
-              <span className="room-number">#{slot}</span>
-              <button
-                className="book-btn"
-                onClick={() => handleBookSlot(slot, "09:00", "10:00")}
-                disabled={loading}
-              >
-                {loading ? "예약 중..." : "예약"}
+      <div className="room-list">
+        {rooms.length === 0 ? (
+          <p>회의실 정보를 불러올 수 없습니다.</p>
+        ) : (
+          rooms.map((room) => (
+            <div key={room.id} className="room-card">
+              <h3>{room.name}</h3>
+              <p>최대 수용 인원: {room.capacity}명</p>
+              <button onClick={() => fetchAvailableTimeSlots(room.id)}>
+                예약 가능 시간 보기
               </button>
+              {roomTimeSlots[room.id] && (
+                <div className="time-slots">
+                  {Object.entries(roomTimeSlots[room.id]).map(
+                    ([startTime, available]) => (
+                      <div
+                        key={startTime}
+                        className={`time-slot ${available ? "available" : "unavailable"}`}
+                        style={{
+                          cursor: available ? "pointer" : "not-allowed",
+                          pointerEvents: available ? "auto" : "none",
+                        }}
+                        onClick={() =>
+                          available &&
+                          handleReservation(room.id, startTime, room.capacity)
+                        }
+                      >
+                        <span>{startTime}</span>
+                        {available && (
+                          <button
+                            type="button"
+                            className="reservation-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReservation(
+                                room.id,
+                                startTime,
+                                room.capacity,
+                              );
+                            }}
+                          >
+                            예약하기
+                          </button>
+                        )}
+                      </div>
+                    ),
+                  )}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          ))
+        )}
       </div>
     </div>
   );

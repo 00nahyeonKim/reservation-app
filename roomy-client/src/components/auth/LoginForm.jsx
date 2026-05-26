@@ -1,28 +1,61 @@
-import { useState } from "react";
-import axios from "../../api/axiosInstance";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../../api/axiosInstance";
 
-const LoginForm = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState("");
+const LoginForm = () => {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+
+    if (!username || !password) {
+      setErrors({
+        username: "아이디를 입력해주세요",
+        password: "비밀번호를 입력해주세요",
+      });
+      return;
+    }
+
+    if (username.length < 6 || username.length > 13) {
+      setErrors({ username: "아이디는 6~13 자까지 입력해주세요" });
+      return;
+    }
+
+    setErrors({ username: "" });
     setLoading(true);
 
     try {
-      const response = await axios.post("/api/auth/login", { email, password });
-      const { token, userInfo } = response.data;
+      const result = await api.post("/api/auth/login", {
+        username,
+        password,
+      });
 
-      // 토큰과 사용자 정보를 localStorage 에 저장
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      // Spring Boot REST API 는 ResponseEntity<LoginResponseDto> 로 JSON 객체 전체를 반환합니다.
+      // axios.defaults.withCredentials = true 설정으로 Spring Session 의 세션 쿠키 (JSESSIONID) 가 자동으로 처리됩니다.
 
-      onLoginSuccess(userInfo);
-    } catch (err) {
-      setError(err.message || "로그인 실패");
+      const data = result.data || result;
+
+      // ✅ LoginResponseDto 가 반환됨 (id, username, email 필드 포함)
+      if (data) {
+        navigate("/dashboard");
+
+        setErrors({});
+        setUsername("");
+        setPassword("");
+      } else {
+        setError("로그인 실패했습니다.");
+        setErrors({ username: "" });
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message || error.message || "로그인 실패했습니다";
+      setError(message);
+      setErrors({ username: "" });
     } finally {
       setLoading(false);
     }
@@ -34,16 +67,19 @@ const LoginForm = ({ onLoginSuccess }) => {
 
       {error && <div className="error-message">{error}</div>}
 
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="email">이메일</label>
+          <label htmlFor="username">아이디</label>
           <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
+          {errors.username && (
+            <span className="error-text">{errors.username}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -55,6 +91,9 @@ const LoginForm = ({ onLoginSuccess }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          {errors.password && (
+            <span className="error-text">{errors.password}</span>
+          )}
         </div>
 
         <button type="submit" disabled={loading}>

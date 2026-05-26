@@ -25,14 +25,9 @@ api.interceptors.response.use(
     if (error.response) {
       const { status, data } = error.response;
 
-      // 인증 에러 (401) - 로그아웃 처리
+      // 인증 에러 (401) 처리
       if (status === 401) {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userInfo");
-        window.location.href = "/login";
-        return Promise.reject(
-          new Error("세션 만료되었습니다. 다시 로그인해주세요."),
-        );
+        return Promise.reject(new Error("세션 만료되었습니다."));
       }
 
       // 비관적 락 에러 (409)

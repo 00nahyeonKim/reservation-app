@@ -1,54 +1,87 @@
-import { useState } from "react";
-import axios from "../../api/axiosInstance";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import api from "../../api/axiosInstance";
 
 const SignupForm = ({ onSignupSuccess }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    // 6~13 자 ID 검증
-    if (!username.match(/^[a-zA-Z0-9]{6,13}$/)) {
-      setError("아이디는 6~13 자 영문/숫자로 입력해야 합니다.");
-      return;
+  const validateForm = () => {
+    if (!username || !email || !password || !confirmPassword) {
+      setErrors({
+        username: "아이디를 입력해주세요",
+        email: "이메일을 입력해주세요",
+        password: "비밀번호를 입력해주세요",
+        confirmPassword: "비밀번호 확인을 입력해주세요",
+      });
+      return false;
     }
+    return true;
+  };
 
-    // 비밀번호 확인
+  const validateCredentials = () => {
+    if (username.length < 6 || username.length > 13) {
+      setErrors({ username: "아이디는 6~13 자까지 입력해주세요" });
+      return false;
+    }
     if (password !== confirmPassword) {
-      setError("비밀번호가 일치하지 않습니다.");
-      return;
+      setErrors({ confirmPassword: "비밀번호가 일치하지 않습니다" });
+      return false;
     }
-
-    // 비밀번호 최소 길이
     if (password.length < 8) {
-      setError("비밀번호는 최소 8 자 이상 입력해야 합니다.");
+      setErrors({ password: "비밀번호는 최소 8 자 이상 입력해주세요" });
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm() || !validateCredentials()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await axios.post("/api/auth/signup", {
+      const result = await api.post("/api/auth/signup", {
         username,
         email,
         password,
       });
 
-      const { token, userInfo } = response.data;
+      // Spring Boot REST API 는 ResponseEntity<SignupResponseDto> 로 JSON 객체 전체를 반환합니다.
+      // axios.defaults.withCredentials = true 설정으로 Spring Session 의 세션 쿠키 (JSESSIONID) 가 자동으로 처리됩니다.
 
-      // 토큰과 사용자 정보를 localStorage 에 저장
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      const data = result.data || result;
 
-      onSignupSuccess(userInfo);
-    } catch (err) {
-      setError(err.message || "회원가입 실패");
+      // ✅ SignupResponseDto 가 반환됨
+      if (data) {
+        navigate("/dashboard");
+
+        setErrors({});
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+      } else {
+        setError("회원가입 실패했습니다.");
+        setErrors({ username: "" });
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "회원가입 실패했습니다";
+      setError(message);
+      setErrors({ username: "" });
     } finally {
       setLoading(false);
     }
@@ -60,7 +93,7 @@ const SignupForm = ({ onSignupSuccess }) => {
 
       {error && <div className="error-message">{error}</div>}
 
-      <form onSubmit={handleSignup}>
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username">아이디</label>
           <input
@@ -69,9 +102,11 @@ const SignupForm = ({ onSignupSuccess }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            maxLength="13"
             placeholder="6~13 자 영문/숫자"
           />
+          {errors.username && (
+            <span className="error-text">{errors.username}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -82,7 +117,9 @@ const SignupForm = ({ onSignupSuccess }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            placeholder="예: example@email.com"
           />
+          {errors.email && <span className="error-text">{errors.email}</span>}
         </div>
 
         <div className="form-group">
@@ -94,7 +131,11 @@ const SignupForm = ({ onSignupSuccess }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
+            placeholder="8 자 이상 입력"
           />
+          {errors.password && (
+            <span className="error-text">{errors.password}</span>
+          )}
         </div>
 
         <div className="form-group">
@@ -106,6 +147,9 @@ const SignupForm = ({ onSignupSuccess }) => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
+          {errors.confirmPassword && (
+            <span className="error-text">{errors.confirmPassword}</span>
+          )}
         </div>
 
         <button type="submit" disabled={loading}>
@@ -115,7 +159,7 @@ const SignupForm = ({ onSignupSuccess }) => {
 
       <div className="signup-footer">
         <p>
-          이미 계정이 있으신가요? <a href="/login">로그인</a>
+          이미 계정이 있으신가요? <Link to="/login">로그인</Link>
         </p>
       </div>
     </div>
