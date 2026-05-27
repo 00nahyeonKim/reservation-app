@@ -17,11 +17,13 @@ http://localhost:8080
 | GET | /api/users/me | 내 정보 조회 | O |
 
 ### POST /api/users/signup
+> `username`: 6~20자 필수 / `password`: 9~15자 필수
+
 **Request**
 ```json
 {
   "username": "testuser",
-  "password": "1234"
+  "password": "password123"
 }
 ```
 **Response** `201 Created`
@@ -35,11 +37,13 @@ http://localhost:8080
 ---
 
 ### POST /api/users/login
+> `username`: 6~20자 필수 / `password`: 필수 (로그인 시 길이 제약 없음)
+
 **Request**
 ```json
 {
   "username": "testuser",
-  "password": "1234"
+  "password": "password123"
 }
 ```
 **Response** `200 OK`
@@ -82,6 +86,8 @@ http://localhost:8080
 | GET | /api/rooms/{id} | 회의실 단건 조회 | X |
 
 ### POST /api/rooms
+> `name`: 최대 100자 필수 / `capacity`: 최소 1 이상 필수
+
 **Request**
 ```json
 {
@@ -137,17 +143,19 @@ http://localhost:8080
 | GET | /api/reservations?roomId=&date= | 날짜별 예약 조회 | X |
 
 ### POST /api/reservations
+> `roomId`, `reservationDate` 필수  
+> `startTime`, `endTime`: `HH:mm` 형식 필수 (정규식: `^([01]\d|2[0-3]):[0-5]\d$`)  
+> `reservationDate` 형식: `yyyy-MM-dd`
+
 **Request**
 ```json
 {
   "roomId": 1,
-  "reservationDate": "2025-06-01",
+  "reservationDate": "2026-06-01",
   "startTime": "09:00",
   "endTime": "10:00"
 }
 ```
-> `reservationDate` 형식: `yyyy-MM-dd`
-> `startTime`, `endTime` 형식: `HH:mm`
 
 **Response** `201 Created`
 ```json
@@ -155,7 +163,7 @@ http://localhost:8080
   "id": 1,
   "username": "testuser",
   "roomName": "1번 회의실",
-  "reservationDate": "2025-06-01",
+  "reservationDate": "2026-06-01",
   "startTime": "09:00",
   "endTime": "10:00",
   "status": "RESERVED"
@@ -174,7 +182,7 @@ http://localhost:8080
     "id": 1,
     "username": "testuser",
     "roomName": "1번 회의실",
-    "reservationDate": "2025-06-01",
+    "reservationDate": "2026-06-01",
     "startTime": "09:00",
     "endTime": "10:00",
     "status": "RESERVED"
@@ -186,7 +194,8 @@ http://localhost:8080
 
 ### DELETE /api/reservations/{id}
 **Path Variable**: `id` — 예약 ID
-> 본인 예약만 취소 가능. 타인 예약 시도 시 `403`.
+> 본인 예약만 취소 가능. 타인 예약 시도 시 `403`.  
+> 물리적 삭제 없이 `status → CANCELED` (Soft Delete).
 
 **Response** `200 OK`
 
@@ -199,7 +208,7 @@ http://localhost:8080
 
 **예시**
 ```
-GET /api/reservations?roomId=1&date=2025-06-01
+GET /api/reservations?roomId=1&date=2026-06-01
 ```
 
 **Response** `200 OK`
@@ -209,7 +218,7 @@ GET /api/reservations?roomId=1&date=2025-06-01
     "id": 1,
     "username": "testuser",
     "roomName": "1번 회의실",
-    "reservationDate": "2025-06-01",
+    "reservationDate": "2026-06-01",
     "startTime": "09:00",
     "endTime": "10:00",
     "status": "RESERVED"

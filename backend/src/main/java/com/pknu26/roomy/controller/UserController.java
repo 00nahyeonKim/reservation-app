@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pknu26.roomy.dto.request.LoginRequest;
 import com.pknu26.roomy.dto.request.SignUpRequest;
 import com.pknu26.roomy.dto.response.UserResponse;
+import com.pknu26.roomy.entity.User;
 import com.pknu26.roomy.service.UserService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
     private final UserService userService;
+    private static final String SESSION_USER_ID = "LOGIN_USER_ID";
 
     @PostMapping("/signup")
 /*  ResponseEntity: HTTP 응답 전체(상태코드, body 등)를 표현하는 객체
@@ -40,5 +44,19 @@ public class UserController {
         "username": "kim"
         } 
 */
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@RequestBody @Valid LoginRequest request, HttpSession session) {
+
+        User user = userService.login(request);
+        session.setAttribute(SESSION_USER_ID, user.getId());
+        return ResponseEntity.ok(UserResponse.from(user)); // ResponseEntity.ok()는 HTTP 상태코드 200 OK 생성
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpSession session) { // 응답 body 없는 HTTP 응답 객체
+        session.invalidate();
+        return ResponseEntity.ok().build(); // .build()는 body 없이 최종 응답 객체 생성
     }
 }

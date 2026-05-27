@@ -6,8 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-// Request DTO는 JSON을 객체로 변환할 때 Jackson이 기본 생성자를 필요로 해서 @NoArgsConstructor를 사용.
-@NoArgsConstructor
+@NoArgsConstructor // Request DTO는 JSON을 객체로 변환할 때 Jackson이 기본 생성자를 필요로 해서 @NoArgsConstructor를 사용. 
 public class SignUpRequest {
     
     @NotBlank(message = "아이디를 입력해주세요.")

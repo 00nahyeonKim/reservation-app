@@ -2,6 +2,7 @@ package com.pknu26.roomy.service;
 
 import org.springframework.stereotype.Service;
 
+import com.pknu26.roomy.dto.request.LoginRequest;
 import com.pknu26.roomy.dto.request.SignUpRequest;
 import com.pknu26.roomy.dto.response.UserResponse;
 import com.pknu26.roomy.entity.User;
@@ -9,12 +10,11 @@ import com.pknu26.roomy.exception.CustomException;
 import com.pknu26.roomy.exception.ErrorCode;
 import com.pknu26.roomy.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
-// final 필드를 사용하는 생성자를 자동 생성하여 의존성 주입 처리
-@RequiredArgsConstructor
+@RequiredArgsConstructor // final 필드를 사용하는 생성자를 자동 생성하여 의존성 주입 처리
 @Transactional
 public class UserService {
 
@@ -34,5 +34,14 @@ public class UserService {
             return UserResponse.from(userRepository.save(user));
     }
 
-
+    // User 객체 자체를 반환
+    @Transactional(readOnly = true)
+    public User login(LoginRequest request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        if (!user.getPassword().equals(request.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+        return user;
+    }
 }
