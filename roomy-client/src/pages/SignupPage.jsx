@@ -30,6 +30,11 @@ export default function SignupPage({ onNavigate }) {
 
   return (
     <div className="auth-container">
+      {/* 🏠 홈으로 가기 버튼 추가 */}
+      <button className="home-back-btn" onClick={() => onNavigate("home")}>
+        ← 홈으로 돌아가기
+      </button>
+
       <h2 className="auth-title">Roomy 회원가입</h2>
       <p className="auth-subtitle">회의실 예약 시스템 계정을 생성하세요.</p>
 

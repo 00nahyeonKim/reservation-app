@@ -24,6 +24,11 @@ export default function LoginPage({ onLoginSuccess, onNavigate }) {
 
   return (
     <div className="auth-container">
+      {/* 🏠 홈으로 가기 버튼 추가 */}
+      <button className="home-back-btn" onClick={() => onNavigate("home")}>
+        ← 홈으로 돌아가기
+      </button>
+
       <h2 className="auth-title">Roomy 로그인</h2>
       <p className="auth-subtitle">
         동시성 제어 회의실 예약 시스템에 로그인하세요.

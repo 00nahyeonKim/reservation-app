@@ -90,3 +90,18 @@
   font-weight: 600;
   text-decoration: underline;
 }
+
+.home-back-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 20px;
+  padding: 5px 0;
+  text-decoration: underline;
+}
+
+.home-back-btn:hover {
+  color: #333;
+}
