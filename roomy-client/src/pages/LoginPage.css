@@ -1,0 +1,16 @@
+.login-btn {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #28a745; /* 로그인 신뢰감을 주는 그린 톤 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.login-btn:hover {
+  background-color: #218838;
+}

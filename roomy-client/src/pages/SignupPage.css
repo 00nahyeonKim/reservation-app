@@ -1,0 +1,16 @@
+.signup-btn {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #3182ce; /* 회원가입 블루 톤 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.signup-btn:hover {
+  background-color: #2b6cb0;
+}

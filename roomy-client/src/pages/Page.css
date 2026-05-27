@@ -1,0 +1,92 @@
+/* 공통 폰트 및 박스 모델 초기화 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 로그인 & 회원가입과 같은 카드형식 서브페이지 공통 구조 */
+.auth-container {
+  max-width: 420px;
+  margin: 60px auto;
+  padding: 30px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+.auth-title {
+  margin-bottom: 8px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #1a202c;
+  text-align: center;
+}
+
+.auth-subtitle {
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #718096;
+  text-align: center;
+}
+
+/* 폼 및 인풋 그룹 */
+.base-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.base-input {
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e0;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.base-input:focus {
+  border-color: #3182ce;
+}
+
+/* 에러 메시지 박스 */
+.error-box {
+  color: #e53e3e;
+  background-color: #fff5f5;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: left;
+  border: 1px solid #fed7d7;
+}
+
+/* 하단 내비게이션 링크 */
+.page-footer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #4a5568;
+  text-align: center;
+}
+
+.page-link {
+  color: #3182ce;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+}

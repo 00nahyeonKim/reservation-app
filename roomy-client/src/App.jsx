@@ -1,71 +1,74 @@
-import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
-import Logo from "./assets/logo.png";
-import "./App.css";
+import React, { useState, useEffect } from "react";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import DashboardPage from "./pages/DashboardPage";
+import api from "./api/axiosInstance";
+import "./pages/Page.css";
 
-function App() {
-  const { isAuth } = useAuth();
+export default function App() {
+  const [view, setView] = useState("home"); // 초기 진입을 랜딩 페이지(home)로 설정
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  return (
-    <>
-      <header className="app-header">
-        <nav className="nav-container">
-          <Link to="/" className="logo-link">
-            <img src={Logo} alt="Roomy Logo" />
-            <span>Roomy</span>
-          </Link>
-          <div className="nav-links">
-            <Link to="/" className="nav-link">
-              홈
-            </Link>
-            {isAuth ? (
-              <>
-                <Link to="/login" className="nav-link">
-                  로그인
-                </Link>
-                <Link to="/signup" className="nav-link">
-                  회원가입
-                </Link>
-              </>
-            ) : (
-              <Link to="/login" className="nav-link">
-                로그인
-              </Link>
-            )}
-          </div>
-        </nav>
-      </header>
+  useEffect(() => {
+    checkSession();
+  }, []);
 
-      <main className="app-main">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-        </Routes>
-      </main>
+  const checkSession = async () => {
+    try {
+      const res = await api.get("/api/users/me");
+      if (res.data) {
+        setUser(res.data);
+        setView("dashboard"); // 세션이 유효하면 대시보드로 다이렉트 패스
+      }
+    } catch (err) {
+      setView("home"); // 인증 안 되어 있으면 소개 페이지 노출
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <footer className="app-footer">
-        <p>Roomy Reservation System © 2026</p>
-      </footer>
-    </>
-  );
-}
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    setView("dashboard");
+  };
 
-function HomePage() {
-  const { isAuth, isAuthenticated } = useAuth();
+  const handleLogout = async () => {
+    try {
+      await api.post("/api/users/logout");
+      setUser(null);
+      setView("home"); // 로그아웃 시 서비스 첫 메인 화면으로 전환
+    } catch (err) {
+      alert("로그아웃 실패: " + err.message);
+    }
+  };
 
-  return (
-    <section className="hero-section">
-      <div className="hero-container">
-        <h1 className="hero-title">Roomy</h1>
-        <p className="hero-subtitle">
-          공간 예약 플랫폼에서 당신의 시간을 최적화하세요
-        </p>
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginTop: "100px",
+          fontSize: "20px",
+        }}
+      >
+        앱 초기화 중...
       </div>
-    </section>
+    );
+  }
+
+  return (
+    <div>
+      {view === "home" && <HomePage onNavigate={setView} />}
+      {view === "login" && (
+        <LoginPage onLoginSuccess={handleLoginSuccess} onNavigate={setView} />
+      )}
+      {view === "signup" && <SignupPage onNavigate={setView} />}
+      {view === "dashboard" && (
+        <DashboardPage user={user} onLogout={handleLogout} />
+      )}
+    </div>
   );
 }
-
-export default App;

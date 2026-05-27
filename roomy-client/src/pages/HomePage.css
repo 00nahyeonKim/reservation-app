@@ -1,0 +1,106 @@
+.home-container {
+  min-height: 100vh;
+  background-color: #f7fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.home-logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2b6cb0;
+}
+
+.home-login-btn {
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: transparent;
+  color: #2b6cb0;
+  border: 1px solid #2b6cb0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.home-login-btn:hover {
+  background-color: #ebf8ff;
+}
+
+.home-hero {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.home-hero h2 {
+  font-size: 36px;
+  color: #1a202c;
+  margin-bottom: 16px;
+  font-weight: 800;
+}
+
+.home-hero p {
+  font-size: 18px;
+  color: #4a5568;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
+}
+
+.feature-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  text-align: left;
+}
+
+.feature-card h3 {
+  font-size: 20px;
+  color: #2d3748;
+  margin-bottom: 12px;
+}
+
+.feature-card p {
+  font-size: 15px;
+  color: #718096;
+  margin: 0;
+}
+
+.home-cta {
+  margin-top: 20px;
+}
+
+.home-signup-btn {
+  padding: 14px 32px;
+  font-size: 18px;
+  font-weight: bold;
+  background-color: #3182ce;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.home-signup-btn:hover {
+  background-color: #2b6cb0;
+}

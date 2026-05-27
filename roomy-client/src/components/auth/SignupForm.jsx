@@ -9,33 +9,35 @@ const SignupForm = ({ onSignupSuccess }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = () => {
-    if (!username || !email || !password || !confirmPassword) {
-      setErrors({
-        username: "아이디를 입력해주세요",
-        email: "이메일을 입력해주세요",
-        password: "비밀번호를 입력해주세요",
-        confirmPassword: "비밀번호 확인을 입력해주세요",
-      });
+    const newErrors = {};
+    if (!username) newErrors.username = "아이디를 입력해주세요";
+    if (!email) newErrors.email = "이메일을 입력해주세요";
+    if (!password) newErrors.password = "비밀번호를 입력해주세요";
+    if (!confirmPassword)
+      newErrors.confirmPassword = "비밀번호 확인을 입력해주세요";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return false;
     }
     return true;
   };
 
   const validateCredentials = () => {
-    if (username.length < 6 || username.length > 13) {
-      setErrors({ username: "아이디는 6~13 자까지 입력해주세요" });
-      return false;
-    }
-    if (password !== confirmPassword) {
-      setErrors({ confirmPassword: "비밀번호가 일치하지 않습니다" });
-      return false;
-    }
-    if (password.length < 8) {
-      setErrors({ password: "비밀번호는 최소 8 자 이상 입력해주세요" });
+    const newErrors = {};
+    if (username.length < 6 || username.length > 13)
+      newErrors.username = "아이디는 6~13 자까지 입력해주세요";
+    if (password !== confirmPassword)
+      newErrors.confirmPassword = "비밀번호가 일치하지 않습니다";
+    if (password.length < 8)
+      newErrors.password = "비밀번호는 최소 8 자 이상 입력해주세요";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return false;
     }
     return true;
@@ -43,45 +45,36 @@ const SignupForm = ({ onSignupSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
 
-    if (!validateForm() || !validateCredentials()) {
-      return;
-    }
+    if (!validateForm() || !validateCredentials()) return;
 
     setLoading(true);
 
     try {
-      const result = await api.post("/api/auth/signup", {
+      const response = await api.post("/api/auth/signup", {
         username,
         email,
         password,
       });
 
-      // Spring Boot REST API 는 ResponseEntity<SignupResponseDto> 로 JSON 객체 전체를 반환합니다.
-      // axios.defaults.withCredentials = true 설정으로 Spring Session 의 세션 쿠키 (JSESSIONID) 가 자동으로 처리됩니다.
+      if (response.data) {
+        if (onSignupSuccess) {
+          onSignupSuccess(response.data);
+        } else {
+          navigate("/dashboard");
+        }
 
-      const data = result.data || result;
-
-      // ✅ SignupResponseDto 가 반환됨
-      if (data) {
-        navigate("/dashboard");
-
+        // 폼 초기화
         setErrors({});
         setUsername("");
         setEmail("");
         setPassword("");
         setConfirmPassword("");
-      } else {
-        setError("회원가입 실패했습니다.");
-        setErrors({ username: "" });
       }
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "회원가입 실패했습니다";
+    } catch (err) {
+      const message = err.response?.data?.message || "회원가입에 실패했습니다.";
       setError(message);
-      setErrors({ username: "" });
     } finally {
       setLoading(false);
     }
@@ -130,7 +123,6 @@ const SignupForm = ({ onSignupSuccess }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={8}
             placeholder="8 자 이상 입력"
           />
           {errors.password && (
