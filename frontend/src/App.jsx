@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import DashboardPage from "./pages/DashboardPage";
 import api from "./api/axiosInstance";
 import "./pages/Page.css";
+import "./App.css";
 
 export default function App() {
-  const [view, setView] = useState("home"); // 초기 진입을 랜딩 페이지(home)로 설정
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,27 +20,19 @@ export default function App() {
   const checkSession = async () => {
     try {
       const res = await api.get("/api/users/me");
-      if (res.data) {
-        setUser(res.data);
-        setView("dashboard"); // 세션이 유효하면 대시보드로 다이렉트 패스
-      }
+      if (res.data) setUser(res.data);
     } catch (err) {
-      setView("home"); // 인증 안 되어 있으면 소개 페이지 노출
+      // 세션 없음 (로그인 안 된 상태)
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    setView("dashboard");
   };
 
   const handleLogout = async () => {
     try {
       await api.post("/api/users/logout");
       setUser(null);
-      setView("home"); // 로그아웃 시 서비스 첫 메인 화면으로 전환
+      window.location.href = "/";
     } catch (err) {
       alert("로그아웃 실패: " + err.message);
     }
@@ -46,29 +40,45 @@ export default function App() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: "100px",
-          fontSize: "20px",
-        }}
-      >
-        앱 초기화 중...
+      <div className="app-loading-container">
+        <div className="app-loading-emoji">🏢</div>
+        <div className="app-loading-text">Roomy 로딩 중...</div>
       </div>
     );
   }
 
+  // App.jsx의 return 문 내부 Routes 수정
   return (
-    <div>
-      {view === "home" && <HomePage onNavigate={setView} />}
-      {view === "login" && (
-        <LoginPage onLoginSuccess={handleLoginSuccess} onNavigate={setView} />
-      )}
-      {view === "signup" && <SignupPage onNavigate={setView} />}
-      {view === "dashboard" && (
-        <DashboardPage user={user} onLogout={handleLogout} />
-      )}
-    </div>
+    <BrowserRouter>
+      <Toaster position="top-right" toastOptions={{ maxToasts: 3 }} />
+      <Routes>
+        <Route
+          path="/"
+          element={<HomePage user={user} onLogout={handleLogout} />} // user 정보와 로그아웃 함수 전달
+        />
+        <Route
+          path="/login"
+          element={
+            user ? (
+              <Navigate to="/dashboard" />
+            ) : (
+              <LoginPage onLoginSuccess={setUser} />
+            )
+          }
+        />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            user ? (
+              <DashboardPage user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

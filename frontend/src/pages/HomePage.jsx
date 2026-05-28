@@ -1,15 +1,39 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./Page.css";
 import "./HomePage.css";
 
-export default function HomePage({ onNavigate }) {
+export default function HomePage({ user, onLogout }) {
+  const navigate = useNavigate();
+
   return (
     <div className="home-container">
       <header className="home-header">
         <h1 className="home-logo">🏢 Roomy</h1>
-        <button onClick={() => onNavigate("login")} className="home-login-btn">
-          로그인
-        </button>
+
+        {/* 로그인 상태에 따라 조건부 렌더링 */}
+        <div className="home-nav">
+          {user ? (
+            <>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="home-login-btn"
+              >
+                대시보드
+              </button>
+              <button onClick={onLogout} className="home-logout-btn">
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => navigate("/login")}
+              className="home-login-btn"
+            >
+              로그인
+            </button>
+          )}
+        </div>
       </header>
 
       <main className="home-hero">
@@ -38,7 +62,7 @@ export default function HomePage({ onNavigate }) {
 
         <div className="home-cta">
           <button
-            onClick={() => onNavigate("signup")}
+            onClick={() => navigate("/signup")}
             className="home-signup-btn"
           >
             지금 무료 가입하기
