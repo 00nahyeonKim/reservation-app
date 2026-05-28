@@ -2,6 +2,7 @@ package com.pknu26.roomy.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,8 @@ import com.pknu26.roomy.dto.request.LoginRequest;
 import com.pknu26.roomy.dto.request.SignUpRequest;
 import com.pknu26.roomy.dto.response.UserResponse;
 import com.pknu26.roomy.entity.User;
+import com.pknu26.roomy.exception.CustomException;
+import com.pknu26.roomy.exception.ErrorCode;
 import com.pknu26.roomy.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -58,5 +61,21 @@ public class UserController {
     public ResponseEntity<Void> logout(HttpSession session) { // 응답 body 없는 HTTP 응답 객체
         session.invalidate();
         return ResponseEntity.ok().build(); // .build()는 body 없이 최종 응답 객체 생성
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMyInfo(HttpSession session) {
+        Long userId = getLoginUserId(session);
+        User user = userService.findById(userId);
+        return ResponseEntity.ok(UserResponse.from(user));
+    }
+
+    // 헬퍼 메서드 (관례적으로 클래스 마지막에 추가)
+    private Long getLoginUserId(HttpSession session) {
+        Long userId = (Long) session.getAttribute(SESSION_USER_ID);
+        if (userId == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+        return userId;
     }
 }

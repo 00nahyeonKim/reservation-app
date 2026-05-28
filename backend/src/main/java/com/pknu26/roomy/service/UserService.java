@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor // final 필드를 사용하는 생성자를 자동 생성하여 의존성 주입 처리
-@Transactional
+@Transactional // 클래스 필드에 있는 에노테이션이므로 이 클래스의 모든 public 메서드에 적용
 public class UserService {
 
     private final UserRepository userRepository;
@@ -35,7 +35,7 @@ public class UserService {
     }
 
     // User 객체 자체를 반환
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // readOnly = true로 오버라이드 하기 위해 Transactional 에노테이션 사용
     public User login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -43,5 +43,11 @@ public class UserService {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
         return user;
+    }
+
+    @Transactional(readOnly = true) // readOnly = true로 오버라이드 하기 위해 Transactional 에노테이션 사용
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }
