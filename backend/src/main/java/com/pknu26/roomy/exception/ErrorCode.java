@@ -23,7 +23,8 @@ public enum ErrorCode {
     RESERVATION_NOT_FOUND(404, "예약을 찾을 수 없습니다."),
     RESERVATION_DUPLICATED(409, "해당 시간에 이미 예약이 있습니다."),
     RESERVATION_BELOW_MIN_CAPACITY(400, "최소 예약 인원을 충족하지 못했습니다."),
-    INVALID_RESERVATION_TIME(400, "예약 시간이 올바르지 않습니다.");
+    INVALID_RESERVATION_TIME(400, "시작 시간은 종료 시간보다 이전이어야 합니다."),
+    INVALID_RESERVATION_DURATION(400, "예약은 30분 이상 4시간 이하여야 합니다.");
 
     private final int status;
     private final String message;

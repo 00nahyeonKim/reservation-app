@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -28,6 +29,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     // true = 겹치는 예약 있음 (예약 불가), false = 겹치는 예약 없음 (예약 가능)
     boolean existsOverlap(@Param("room") MeetingRoom room,
                           @Param("date") LocalDate date,
-                          @Param("startTime") String startTime,
-                          @Param("endTime") String endTime);
+                          @Param("startTime") LocalTime startTime,
+                          @Param("endTime") LocalTime endTime);
 }

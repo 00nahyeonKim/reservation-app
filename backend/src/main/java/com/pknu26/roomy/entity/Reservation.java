@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 /**
  * 예약 엔터티
@@ -17,12 +18,7 @@ import java.time.LocalDate;
  */
 @Entity
 @Table(
-        name = "reservation",
-        uniqueConstraints = @UniqueConstraint(
-                // 동일 회의실, 동일 날짜, 동일 시작 시간으로 중복 예약되는 것을 DB 레벨에서 방지
-                name = "uk_reservation_room_date_start",
-                columnNames = {"room_id", "reservation_date", "start_time"}
-        )
+        name = "reservation"
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA 기본 생성자 (외부 직접 호출 방지)
@@ -49,13 +45,14 @@ public class Reservation {
     @Column(name = "reservation_date", nullable = false)
     private LocalDate reservationDate;
 
-    /** 예약 시작 시간, "HH:mm" 형식으로 저장 (예: "09:00") */
-    @Column(name = "start_time", length = 5, nullable = false)
-    private String startTime;
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
 
-    /** 예약 종료 시간, "HH:mm" 형식으로 저장 (예: "10:00") */
-    @Column(name = "end_time", length = 5, nullable = false)
-    private String endTime;
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
+
+    @Column(name = "head_count", nullable = false)
+    private Integer headCount;
 
     /** 예약 상태 (RESERVED: 예약 중 / CANCELED: 취소됨), DB에 Enum 이름 문자열로 저장 */
     @Enumerated(EnumType.STRING) // DB에 숫자(ordinal) 대신 문자열("RESERVED", "CANCELED")로 저장
@@ -68,12 +65,13 @@ public class Reservation {
      */
     @Builder
     public Reservation(User user, MeetingRoom room, LocalDate reservationDate,
-                        String startTime, String endTime) {
+                        LocalTime startTime, LocalTime endTime, int headCount) {
         this.user = user;
         this.room = room;
         this.reservationDate = reservationDate;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.headCount = headCount;
         this.status = ReservationStatus.RESERVED; // 신규 예약은 항상 RESERVED 상태로 시작
     }
 

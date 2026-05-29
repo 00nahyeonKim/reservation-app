@@ -32,10 +32,15 @@ public class MeetingRoom {
     @Column(nullable = false)
     private Integer capacity;
 
-    /** 빌더 패턴 생성자 — MeetingRoom.builder().name(...).capacity(...).build() 형태로 객체 생성 */
+    /** 최소 예약 인원 (단위: 명, 필수) */
+    @Column(name = "min_headcount", nullable = false)
+    private Integer minHeadcount;
+
+    /** 빌더 패턴 생성자 — MeetingRoom.builder().name(...).capacity(...).minHeadcount(...).build() 형태로 객체 생성 */
     @Builder
-    public MeetingRoom(String name, Integer capacity) {
+    public MeetingRoom(String name, Integer capacity, Integer minHeadcount) {
         this.name = name;
         this.capacity = capacity;
+        this.minHeadcount = minHeadcount;
     }
 }

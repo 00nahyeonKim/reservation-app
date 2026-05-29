@@ -22,16 +22,16 @@ public class MeetingRoomInitializer {
             }
 
             List<MeetingRoom> meetingRooms = List.of(
-                    MeetingRoom.builder().name("스터디룸 A").capacity(5).build(),
-                    MeetingRoom.builder().name("스터디룸 B").capacity(5).build(),
-                    MeetingRoom.builder().name("스터디룸 C").capacity(5).build(),
-                    MeetingRoom.builder().name("스터디룸 D").capacity(6).build(),
-                    MeetingRoom.builder().name("스터디룸 E").capacity(6).build(),
-                    MeetingRoom.builder().name("스터디룸 F").capacity(6).build(),
-                    MeetingRoom.builder().name("스터디룸 G").capacity(8).build(),
-                    MeetingRoom.builder().name("스터디룸 H").capacity(8).build(),
-                    MeetingRoom.builder().name("스터디룸 I").capacity(10).build(),
-                    MeetingRoom.builder().name("스터디룸 J").capacity(10).build()
+                    MeetingRoom.builder().name("스터디룸 A").capacity(5).minHeadcount(3).build(),
+                    MeetingRoom.builder().name("스터디룸 B").capacity(5).minHeadcount(3).build(),
+                    MeetingRoom.builder().name("스터디룸 C").capacity(5).minHeadcount(3).build(),
+                    MeetingRoom.builder().name("스터디룸 D").capacity(6).minHeadcount(4).build(),
+                    MeetingRoom.builder().name("스터디룸 E").capacity(6).minHeadcount(4).build(),
+                    MeetingRoom.builder().name("스터디룸 F").capacity(6).minHeadcount(4).build(),
+                    MeetingRoom.builder().name("스터디룸 G").capacity(8).minHeadcount(4).build(),
+                    MeetingRoom.builder().name("스터디룸 H").capacity(8).minHeadcount(4).build(),
+                    MeetingRoom.builder().name("스터디룸 I").capacity(10).minHeadcount(6).build(),
+                    MeetingRoom.builder().name("스터디룸 J").capacity(10).minHeadcount(6).build()
             );
 
             meetingRoomRepository.saveAll(meetingRooms);

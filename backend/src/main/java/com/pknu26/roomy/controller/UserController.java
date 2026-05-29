@@ -20,9 +20,9 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-@RestController // REST API용 컨트롤러로 등록하며, return 값을 화면(html)이 아닌 JSON 데이터로 반환
+@RestController // REST API용 컨트롤러로 등록하며, return 값을 화면(html)이 아닌 JSON 데이터로 반환. @Controller와 @ResponseBody를 합친 축약형. 프론트엔드와 백엔드 분리를 쉽게하기 위함.
 @RequestMapping("/api/users") // 공통 prefix
-@RequiredArgsConstructor // final 필드를 사용하는 생성자를 자동 생성하여 의존성 주입 처리
+@RequiredArgsConstructor // final 필드를 사용하는 생성자를 자동 생성하여 Spring의 생성자 주입을 쉽게 함
 public class UserController {
 
     private final UserService userService;

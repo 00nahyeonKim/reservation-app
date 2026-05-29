@@ -5,10 +5,8 @@ import com.pknu26.roomy.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-// Entity → Response DTO 변환
-@Getter
-// Response DTO는 new UserResponse(id, username) 처럼 직접 값을 넣어서 만드니까 @AllArgsConstructor를 씀.
-@AllArgsConstructor
+@Getter // Entity → Response DTO 변환
+@AllArgsConstructor // Response DTO는 new UserResponse(id, username) 처럼 직접 값을 넣어서 만드니까 @AllArgsConstructor를 씀. 
 public class UserResponse {
 
     private Long id;
